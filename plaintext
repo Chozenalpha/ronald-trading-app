@@ -1,0 +1,17 @@
+ronald-trading-app/
+│
+├── backend/
+│   ├── index.js           # Main server file
+│   ├── package.json       # Backend dependencies
+│   └── .gitignore         # Ignore node_modules
+│
+├── frontend/
+│   ├── public/
+│   │   └── index.html     # Frontend HTML template
+│   ├── src/
+│   │   ├── App.js         # Main React component
+│   │   ├── index.js       # ReactDOM render
+│   ├── package.json       # Frontend dependencies
+│   └── .gitignore         # Ignore node_modules
+│
+└── README.md
