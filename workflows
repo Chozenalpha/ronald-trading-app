@@ -1,0 +1,48 @@
+version: "1"
+tests:
+  - name: "Maseno App – Homepage Availability"
+    type: browser
+    subtype: http
+    request:
+      url: "https://masenotrading.com"
+      method: GET
+    assertions:
+      - type: statusCode
+        operator: is
+        target: 200
+      - type: responseTime
+        operator: lessThan
+        target: 3000
+    locations:
+      - aws:eu-west-1
+    options:
+      tick_every: 300
+      retry:
+        count: 2
+        interval: 300
+    tags:
+      - app:maseno-trading
+      - env:production
+      - type:frontend
+
+  - name: "Maseno App – API Health Check"
+    type: api
+    subtype: http
+    request:
+      url: "https://api.masenotrading.com/health"
+      method: GET
+    assertions:
+      - type: statusCode
+        operator: is
+        target: 200
+      - type: body
+        operator: contains
+        target: "OK"
+    locations:
+      - aws:eu-west-1
+    options:
+      tick_every: 300
+    tags:
+      - app:maseno-trading
+      - env:production
+      - type:backend
