@@ -1,0 +1,180 @@
+version: "1"
+
+tests:
+
+#################################
+# STAGING ENVIRONMENT
+#################################
+
+  - name: "Maseno App (Staging) – API Health"
+    type: api
+    subtype: http
+    request:
+      url: "https://staging-api.masenotrading.com/health"
+      method: GET
+    assertions:
+      - type: statusCode
+        operator: is
+        target: 200
+    options:
+      tick_every: 300
+      monitor_options:
+        renotify_interval: 60
+    locations:
+      - aws:eu-west-1
+    tags:
+      - app:maseno
+      - env:staging
+      - platform:mobile
+      - service:health
+
+  - name: "Maseno App (Staging) – Login"
+    type: api
+    subtype: http
+    request:
+      url: "https://staging-api.masenotrading.com/auth/login"
+      method: POST
+      headers:
+        Content-Type: application/json
+      body: |
+        {
+          "email": "{{ MASENO_TEST_EMAIL }}",
+          "password": "{{ MASENO_TEST_PASSWORD }}"
+        }
+    assertions:
+      - type: statusCode
+        operator: is
+        target: 200
+      - type: jsonPath
+        operator: isNotEmpty
+        target: "$.access_token"
+    options:
+      tick_every: 600
+    locations:
+      - aws:eu-west-1
+    tags:
+      - app:maseno
+      - env:staging
+      - service:auth
+
+#################################
+# PRODUCTION ENVIRONMENT
+#################################
+
+  - name: "Maseno App (Prod) – API Health"
+    type: api
+    subtype: http
+    request:
+      url: "https://api.masenotrading.com/health"
+      method: GET
+    assertions:
+      - type: statusCode
+        operator: is
+        target: 200
+      - type: responseTime
+        operator: lessThan
+        target: 2500
+    options:
+      tick_every: 300
+      monitor_options:
+        renotify_interval: 30
+        escalation_message: "🚨 Maseno App backend is DOWN"
+    locations:
+      - aws:eu-west-1
+    tags:
+      - app:maseno
+      - env:production
+      - platform:mobile
+      - service:health
+
+  - name: "Maseno App (Prod) – Login"
+    type: api
+    subtype: http
+    request:
+      url: "https://api.masenotrading.com/auth/login"
+      method: POST
+      headers:
+        Content-Type: application/json
+      body: |
+        {
+          "email": "{{ MASENO_TEST_EMAIL }}",
+          "password": "{{ MASENO_TEST_PASSWORD }}"
+        }
+    assertions:
+      - type: statusCode
+        operator: is
+        target: 200
+      - type: jsonPath
+        operator: isNotEmpty
+        target: "$.access_token"
+    options:
+      tick_every: 600
+      monitor_options:
+        renotify_interval: 30
+        escalation_message: "🚨 Maseno App login failing"
+    locations:
+      - aws:eu-west-1
+    tags:
+      - app:maseno
+      - env:production
+      - platform:mobile
+      - service:auth
+
+  - name: "Maseno App (Prod) – Fetch Products"
+    type: api
+    subtype: http
+    request:
+      url: "https://api.masenotrading.com/products"
+      method: GET
+      headers:
+        Authorization: "Bearer {{ MASENO_PROD_API_TOKEN }}"
+    assertions:
+      - type: statusCode
+        operator: is
+        target: 200
+      - type: jsonPath
+        operator: isNotEmpty
+        target: "$[0].id"
+    options:
+      tick_every: 600
+    locations:
+      - aws:eu-west-1
+    tags:
+      - app:maseno
+      - env:production
+      - platform:mobile
+      - service:products
+
+  - name: "Maseno App (Prod) – Create Order / Checkout"
+    type: api
+    subtype: http
+    request:
+      url: "https://api.masenotrading.com/orders"
+      method: POST
+      headers:
+        Content-Type: application/json
+        Authorization: "Bearer {{ MASENO_PROD_API_TOKEN }}"
+      body: |
+        {
+          "product_id": 1,
+          "quantity": 1,
+          "payment_method": "mobile_money"
+        }
+    assertions:
+      - type: statusCode
+        operator: is
+        target: 201
+      - type: jsonPath
+        operator: isNotEmpty
+        target: "$.order_id"
+    options:
+      tick_every: 900
+      monitor_options:
+        escalation_message: "🚨 Checkout failing on Maseno App"
+    locations:
+      - aws:eu-west-1
+    tags:
+      - app:maseno
+      - env:production
+      - platform:mobile
+      - service:orders
