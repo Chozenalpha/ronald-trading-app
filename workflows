@@ -1,30 +1,6 @@
 version: "1"
-tests:
-  - name: "Maseno App – Homepage Availability"
-    type: browser
-    subtype: http
-    request:
-      url: "https://masenotrading.com"
-      method: GET
-    assertions:
-      - type: statusCode
-        operator: is
-        target: 200
-      - type: responseTime
-        operator: lessThan
-        target: 3000
-    locations:
-      - aws:eu-west-1
-    options:
-      tick_every: 300
-      retry:
-        count: 2
-        interval: 300
-    tags:
-      - app:maseno-trading
-      - env:production
-      - type:frontend
 
+tests:
   - name: "Maseno App – API Health Check"
     type: api
     subtype: http
@@ -38,11 +14,67 @@ tests:
       - type: body
         operator: contains
         target: "OK"
-    locations:
-      - aws:eu-west-1
     options:
       tick_every: 300
+    locations:
+      - aws:eu-west-1
     tags:
-      - app:maseno-trading
+      - app:maseno
+      - platform:mobile
       - env:production
-      - type:backend
+      - service:backend
+
+  - name: "Maseno App – Mobile Login API"
+    type: api
+    subtype: http
+    request:
+      url: "https://api.masenotrading.com/auth/login"
+      method: POST
+      headers:
+        Content-Type: application/json
+      body: |
+        {
+          "email": "{{ MASENO_TEST_EMAIL }}",
+          "password": "{{ MASENO_TEST_PASSWORD }}"
+        }
+    assertions:
+      - type: statusCode
+        operator: is
+        target: 200
+      - type: jsonPath
+        operator: isNotEmpty
+        target: "$.access_token"
+    options:
+      tick_every: 600
+    locations:
+      - aws:eu-west-1
+    tags:
+      - app:maseno
+      - platform:mobile
+      - env:production
+      - service:auth
+
+  - name: "Maseno App – Fetch Products (Authenticated)"
+    type: api
+    subtype: http
+    request:
+      url: "https://api.masenotrading.com/products"
+      method: GET
+      headers:
+        Authorization: "Bearer {{ MASENO_API_TOKEN }}"
+    assertions:
+      - type: statusCode
+        operator: is
+        target: 200
+      - type: jsonPath
+        operator: isNotEmpty
+        target: "$[0].id"
+    options:
+      tick_every: 600
+    locations:
+      - aws:eu-west-1
+    tags:
+      - app:maseno
+      - platform:mobile
+      - env:production
+      - service:products
