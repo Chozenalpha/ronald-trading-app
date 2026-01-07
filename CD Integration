@@ -1,0 +1,20 @@
+name: Datadog Synthetics
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  synthetics:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run Datadog Synthetics
+        run: |
+          npm install -g @datadog/datadog-ci
+          datadog-ci synthetics run-tests \
+            --config datadog-synthetics.yml
+        env:
+          DATADOG_API_KEY: ${{ secrets.DATADOG_API_KEY }}
+          DATADOG_APP_KEY: ${{ secrets.DATADOG_APP_KEY }}
