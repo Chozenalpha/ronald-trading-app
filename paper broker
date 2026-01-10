@@ -1,0 +1,5 @@
+export class PaperBroker implements Broker {
+  async placeOrder(order) {
+    return { status: "FILLED", price: order.price };
+  }
+}
