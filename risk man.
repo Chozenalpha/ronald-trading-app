@@ -1,0 +1,5 @@
+export function validateRisk(order) {
+  if (order.amount > 1000) {
+    throw new Error("Risk limit exceeded");
+  }
+}
