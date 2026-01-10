@@ -1,0 +1,4 @@
+const broker =
+  process.env.TRADING_MODE === "live"
+    ? new RealBroker()
+    : new PaperBroker();
