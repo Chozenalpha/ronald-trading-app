@@ -1,0 +1,5 @@
+export class RealBroker implements Broker {
+  async placeOrder(order) {
+    // real exchange API call
+  }
+}
